@@ -2,7 +2,7 @@ import tkinter as tk
 import math
 
 class LiquidAnimation:
-    def __init__(self, canvas, width, height):
+    def __init__(self, canvas, width, height, density=1.0):
         self.canvas = canvas
         self.width = width
         self.height = height
@@ -10,6 +10,7 @@ class LiquidAnimation:
         self.amplitude = 10
         self.period = 50
         self.offset = 0
+        self.density = density  # Liquid density
         self.water_polygon = None
         self.create_water()
 
@@ -20,7 +21,7 @@ class LiquidAnimation:
             water_coords.append((x, y))
         water_coords.append((self.width, self.height))
         water_coords_flat = [coord for point in water_coords for coord in point]  # Flatten the list
-        self.water_polygon = self.canvas.create_polygon(tuple(water_coords_flat), fill="blue", outline="")
+        self.water_polygon = self.canvas.create_polygon(tuple(water_coords_flat), fill=self.get_color(), outline="")
 
     def animate(self):
         self.offset += 1
@@ -31,5 +32,6 @@ class LiquidAnimation:
         water_coords.append((self.width, self.height))
         water_coords_flat = [coord for point in water_coords for coord in point]  # Flatten the list
         self.canvas.coords(self.water_polygon, tuple(water_coords_flat))
+        self.canvas.itemconfig(self.water_polygon, fill=self.get_color())
 
         self.canvas.after(25, self.animate)
