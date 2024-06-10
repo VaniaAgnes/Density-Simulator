@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 from simulation import LiquidAnimation
 import math
 
@@ -17,7 +18,7 @@ class DensitySimulatorUI:
         self.canvas_frame.grid(row=0, column=0, columnspan=2)
 
         # Initialize the animation with default density
-        self.liquid_animation = LiquidAnimation(self.canvas_frame.canvas, 800, 600, density=17)
+        self.liquid_animation = LiquidAnimation(self.canvas_frame.canvas, 800, 600, density=0.5)
         self.canvas_frame.set_liquid_animation(self.liquid_animation)
         self.liquid_animation.animate()
 
@@ -26,42 +27,42 @@ class CanvasFrame(tk.Frame):
     def __init__(self, parent, width, height):
         super().__init__(parent)
 
-        # Liquid Density Slider
+                # Liquid Density Slider
         self.density_label = ttk.Label(self, text="Liquid Density:")
-        self.density_label.grid(row=0, column=0, columnspan=2, sticky=tk.W)
+        self.density_label.grid(row=0, column=0, sticky=tk.W)
         self.density_slider = tk.Scale(self, from_=0.5, to=2.0, resolution=0.1, orient=tk.HORIZONTAL,
                                        command=self.update_density)
-        self.density_slider.set(17)  # Default density
-        self.density_slider.grid(row=1, column=0, columnspan=2, sticky=tk.W)
+        self.density_slider.set(0.5)  # Default density
+        self.density_slider.grid(row=1, column=0, sticky=tk.W)
 
         # Object Selection Dropdown
         self.object_label = ttk.Label(self, text="Select Object:")
-        self.object_label.grid(row=2, column=0, columnspan=2, sticky=tk.W)
+        self.object_label.grid(row=0, column=1, sticky=tk.W)
         self.preset_objects = ["Custom", "Paper", "Ice", "Brick", "Silicon", "Aluminum", "Titanium", "Iron", "Tin Bronze"]
         self.object_combobox = ttk.Combobox(self, values=self.preset_objects, state="readonly")
         self.object_combobox.current(0)  # Default selection
-        self.object_combobox.grid(row=3, column=0, columnspan=2, sticky=tk.W)
+        self.object_combobox.grid(row=1, column=1, sticky=tk.W)
         self.object_combobox.bind("<<ComboboxSelected>>", self.update_object)
 
         # Object Density Input
         self.obj_density_label = ttk.Label(self, text="Object Density:")
-        self.obj_density_label.grid(row=4, column=0, columnspan=2, sticky=tk.W)
+        self.obj_density_label.grid(row=0, column=2, sticky=tk.W)
         self.obj_density_entry = ttk.Entry(self)
-        self.obj_density_entry.grid(row=5, column=0, columnspan=2, sticky=tk.W)
+        self.obj_density_entry.grid(row=1, column=2, sticky=tk.W)
 
         # Object Volume Input
         self.obj_volume_label = ttk.Label(self, text="Object Volume:")
-        self.obj_volume_label.grid(row=6, column=0, columnspan=2, sticky=tk.W)
+        self.obj_volume_label.grid(row=0, column=3, sticky=tk.W)
         self.obj_volume_entry = ttk.Entry(self)
-        self.obj_volume_entry.grid(row=7, column=0, columnspan=2, sticky=tk.W)
+        self.obj_volume_entry.grid(row=1, column=3, sticky=tk.W)
 
         # Update Button
         self.update_button = ttk.Button(self, text="Update Object", command=self.update_object)
-        self.update_button.grid(row=8, column=0, columnspan=2, sticky=tk.W)
+        self.update_button.grid(row=1, column=4, sticky=tk.W)
 
         # Canvas for animation
         self.canvas = tk.Canvas(self, width=width, height=height, bg="white")
-        self.canvas.grid(row=9, column=0, columnspan=2, sticky=(tk.W, tk.E))
+        self.canvas.grid(row=2, column=0, columnspan=5, sticky=(tk.W, tk.E))
 
         self.liquid_animation = None
         self.cube = None
@@ -78,31 +79,42 @@ class CanvasFrame(tk.Frame):
         selected_object = self.object_combobox.get()
 
         if selected_object == "Custom":
-            obj_density = float(self.obj_density_entry.get())
-            obj_volume = float(self.obj_volume_entry.get())
+            if not self.obj_density_entry.get() or not self.obj_volume_entry.get():
+                messagebox.showerror("Input Error", "Please enter values for both density and volume.")
+                return
+            try:
+                obj_density = float(self.obj_density_entry.get())
+                obj_volume = float(self.obj_volume_entry.get())
+            except ValueError:
+                messagebox.showerror("Input Error", "Please enter valid numbers for density and volume.")
+                return
         else:
-            obj_density, obj_volume = self.get_preset_object_properties(selected_object)
-            # Update entries with preset values for clarity
+            obj_density, _ = self.get_preset_object_properties(selected_object)
+            try:
+                obj_volume = float(self.obj_volume_entry.get()) if self.obj_volume_entry.get() else messagebox.showerror("Input Error", "Please enter a valid number for volume.")
+            except ValueError:
+                messagebox.showerror("Input Error", "Please enter a valid number for volume.")
+                return
+
+            # Update density entry with preset value for clarity
             self.obj_density_entry.delete(0, tk.END)
             self.obj_density_entry.insert(0, obj_density)
-            self.obj_volume_entry.delete(0, tk.END)
-            self.obj_volume_entry.insert(0, obj_volume)
 
         self.create_cube(obj_density, obj_volume, selected_object)
 
     def get_preset_object_properties(self, obj_name):
-        # Define densities and volumes for preset objects
+        # Define densities for preset objects
         properties = {
-            "Paper": (0.8, 17),
-            "Ice": (0.92, 17),
-            "Brick": (2.4, 17),
-            "Silicon": (2.33, 17),
-            "Aluminum": (2.7, 17),
-            "Titanium": (4.5, 17),
-            "Iron": (7.87, 17),
-            "Tin Bronze": (8.8, 17)
+            "Paper": 0.8,
+            "Ice": 0.92,
+            "Brick": 2.4,
+            "Silicon": 2.33,
+            "Aluminum": 2.7,
+            "Titanium": 4.5,
+            "Iron": 7.87,
+            "Tin Bronze": 8.8
         }
-        return properties.get(obj_name, (17, 17))
+        return properties.get(obj_name, 17), 17
 
     def create_cube(self, obj_density, obj_volume, selected_object):
         # Remove existing cube
@@ -116,41 +128,30 @@ class CanvasFrame(tk.Frame):
         # Volume = mass / density
         mass = obj_density * obj_volume
         # Assuming the cube shape, calculate its side length
-        cube_side_length = math.pow(mass, 1/3.0) * 17  # Adjust scale for visibility
+        cube_side_length = math.pow(mass, 1/3.0) * 10  # Adjust scale for visibility
         cube_x = 400 - cube_side_length / 2  # Center of the canvas
         cube_y = wave_center - cube_side_length  # Position just above the liquid
 
         # Determine color based on selected object
-        if selected_object == "Paper":
-            cube_color = "white"
-        elif selected_object == "Ice":
-            cube_color = "light blue"
-        elif selected_object == "Brick":
-            cube_color = "#b22222"  # Red brown     
-        elif selected_object == "Silicon":
-            cube_color = "light gray"
-            outline_color = "black"
-        elif selected_object == "Aluminum":
-            cube_color = "silver"
-        elif selected_object == "Titanium":
-            cube_color = "dark gray"
-        elif selected_object in ["Iron", "Tin Bronze"]:
-            cube_color = "brown"
-        else:
-            cube_color = "black"
+        colors = {
+            "Paper": "white",
+            "Ice": "light blue",
+            "Brick": "#b22222",  # Red brown
+            "Silicon": "light gray",
+            "Aluminum": "silver",
+            "Titanium": "dark gray",
+            "Iron": "brown",
+            "Tin Bronze": "brown",
+            "Custom": "black"
+        }
+        cube_color = colors.get(selected_object, "black")
 
         # Draw cube
-        if selected_object == "Silicon":
-            self.cube = self.canvas.create_rectangle(cube_x, cube_y, cube_x + cube_side_length, cube_y + cube_side_length,
-                                                     fill=cube_color, outline=outline_color)
-        else:
-            self.cube = self.canvas.create_rectangle(cube_x, cube_y, cube_x + cube_side_length, cube_y + cube_side_length,
-                                                     fill=cube_color)
+        self.cube = self.canvas.create_rectangle(cube_x, cube_y, cube_x + cube_side_length, cube_y + cube_side_length,
+                                                 fill=cube_color, outline="black")
 
 if __name__ == "__main__":
     root = tk.Tk()
     app = DensitySimulatorUI(root)
     root.mainloop()
-
-
 
