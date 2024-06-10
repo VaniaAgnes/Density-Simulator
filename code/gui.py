@@ -2,6 +2,8 @@
 import tkinter as tk
 from tkinter import ttk
 from simulation import LiquidAnimation  # Import LiquidAnimation class
+import tkinter.messagebox as messagebox
+
 
 class DensitySimulatorUI:
     def __init__(self, root):
@@ -103,6 +105,10 @@ class CanvasFrame(tk.Frame):
             'color': cube_color
         }
 
+        # Show result in message box
+        result = self.check_float_or_sink()
+        messagebox.showinfo("Float or Sink", result)
+
         # Draw cube
         self.cube = self.canvas.create_rectangle(cube_x, cube_y, cube_x + cube_width, cube_y + cube_height, fill=cube_color)
 
@@ -113,12 +119,13 @@ class CanvasFrame(tk.Frame):
         cube_colors = {
             "Paper": "white",
             "Ice": "light blue",
-            "Brick": "red",
-            "Silicon": "grey",
-            "Aluminum": "silver",
-            "Titanium": "gray",
-            "Iron": "dark gray",
-            "Tin Bronze": "brown"
+            "Brick": "#bc4a3c",  # Red brown
+            "Silicon": "#9599a5",
+            "Aluminum": "#848789",
+            "Titanium": "#878681",
+            "Iron": "#d4d7d9",
+            "Tin Bronze": "#cd7f32",
+            "Custom": "black"
         }
         return cube_colors.get(selected_object, "black")
 
@@ -146,3 +153,15 @@ class CanvasFrame(tk.Frame):
 
             # Update the position of the cube based on acceleration
             self.canvas.move(self.cube, 0, -acceleration * 0.025)  # Move the cube upward
+
+    def check_float_or_sink(self):
+        liquid_density = self.liquid_animation.density
+        cube_density = self.cube_properties['density']
+        buoyant_force = liquid_density * self.cube_properties['volume'] * 9.81  # Assuming gravity = 9.81 m/s^2
+        weight = cube_density * self.cube_properties['volume'] * 9.81  # Assuming gravity = 9.81 m/s^2
+
+        # Compare the weight and buoyant force to determine if the cube floats or sinks
+        if buoyant_force >= weight:
+            return "Float!"
+        else:
+            return "Sink!"

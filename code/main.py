@@ -27,7 +27,7 @@ class CanvasFrame(tk.Frame):
     def __init__(self, parent, width, height):
         super().__init__(parent)
 
-                # Liquid Density Slider
+        # Liquid Density Slider
         self.density_label = ttk.Label(self, text="Liquid Density:")
         self.density_label.grid(row=0, column=0, sticky=tk.W)
         self.density_slider = tk.Scale(self, from_=0.5, to=2.0, resolution=0.1, orient=tk.HORIZONTAL,
@@ -74,7 +74,7 @@ class CanvasFrame(tk.Frame):
         density = float(value)
         if self.liquid_animation:
             self.liquid_animation.set_density(density)
-
+    
     def update_object(self, event=None):
         selected_object = self.object_combobox.get()
 
@@ -100,7 +100,12 @@ class CanvasFrame(tk.Frame):
             self.obj_density_entry.delete(0, tk.END)
             self.obj_density_entry.insert(0, obj_density)
 
+        # Create cube
         self.create_cube(obj_density, obj_volume, selected_object)
+
+        # Show result in message box based on the object's properties
+        result = self.check_float_or_sink(obj_density, obj_volume)
+        messagebox.showinfo("Float or Sink", result)
 
     def get_preset_object_properties(self, obj_name):
         # Define densities for preset objects
@@ -136,19 +141,30 @@ class CanvasFrame(tk.Frame):
         colors = {
             "Paper": "white",
             "Ice": "light blue",
-            "Brick": "#b22222",  # Red brown
-            "Silicon": "light gray",
-            "Aluminum": "silver",
-            "Titanium": "dark gray",
-            "Iron": "brown",
-            "Tin Bronze": "brown",
+            "Brick": "#bc4a3c",  # Red brown
+            "Silicon": "#9599a5",
+            "Aluminum": "#848789",
+            "Titanium": "#878681",
+            "Iron": "#d4d7d9",
+            "Tin Bronze": "#cd7f32",
             "Custom": "black"
         }
         cube_color = colors.get(selected_object, "black")
 
         # Draw cube
         self.cube = self.canvas.create_rectangle(cube_x, cube_y, cube_x + cube_side_length, cube_y + cube_side_length,
-                                                 fill=cube_color, outline="black")
+                                                 fill=cube_color, outline="")
+
+    def check_float_or_sink(self, obj_density, obj_volume):
+        liquid_density = self.liquid_animation.density
+        buoyant_force = liquid_density * obj_volume * 9.81  # Assuming gravity = 9.81 m/s^2
+        weight = obj_density * obj_volume * 9.81  # Assuming gravity = 9.81 m/s^2
+
+        # Compare the weight and buoyant force to determine if the object floats or sinks
+        if buoyant_force >= weight:
+            return "Float!"
+        else:
+            return "Sink!"
 
 if __name__ == "__main__":
     root = tk.Tk()
