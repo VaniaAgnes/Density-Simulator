@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
-from simulation import LiquidAnimation
+from simulation import LiquidAnimation, ObjectAnimation
 import math
 
 class DensitySimulatorUI:
@@ -74,7 +74,7 @@ class CanvasFrame(tk.Frame):
         density = float(value)
         if self.liquid_animation:
             self.liquid_animation.set_density(density)
-    
+
     def update_object(self, event=None):
         selected_object = self.object_combobox.get()
 
@@ -91,7 +91,9 @@ class CanvasFrame(tk.Frame):
         else:
             obj_density, _ = self.get_preset_object_properties(selected_object)
             try:
-                obj_volume = float(self.obj_volume_entry.get()) if self.obj_volume_entry.get() else messagebox.showerror("Input Error", "Please enter a valid number for volume.")
+                obj_volume = float(
+                    self.obj_volume_entry.get()) if self.obj_volume_entry.get() else messagebox.showerror("Input Error",
+                                                                                                          "Please enter a valid number for volume.")
             except ValueError:
                 messagebox.showerror("Input Error", "Please enter a valid number for volume.")
                 return
@@ -105,6 +107,14 @@ class CanvasFrame(tk.Frame):
 
         # Show result in message box based on the object's properties
         result = self.check_float_or_sink(obj_density, obj_volume)
+
+        if result == "Sink!":
+            object_animation = ObjectAnimation(self.canvas, self.cube, self.liquid_animation)
+            object_animation.sink_cube()
+        elif result == "Float!":
+            object_animation = ObjectAnimation(self.canvas, self.cube, self.liquid_animation)
+            object_animation.float_cube()
+
         messagebox.showinfo("Float or Sink", result)
 
     def get_preset_object_properties(self, obj_name):
@@ -133,9 +143,15 @@ class CanvasFrame(tk.Frame):
         # Volume = mass / density
         mass = obj_density * obj_volume
         # Assuming the cube shape, calculate its side length
-        cube_side_length = math.pow(mass, 1/3.0) * 10  # Adjust scale for visibility
+        cube_side_length = math.pow(mass, 1 / 3.0) * 10  # Adjust scale for visibility
         cube_x = 400 - cube_side_length / 2  # Center of the canvas
-        cube_y = wave_center - cube_side_length  # Position just above the liquid
+
+        # Determine cube_y based on buoyancy
+        result = self.check_float_or_sink(obj_density, obj_volume)
+        if result == "Float!":
+            cube_y = wave_center - cube_side_length  # Position just above the liquid
+        else:
+            cube_y = wave_center + 100  # Position below the liquid
 
         # Determine color based on selected object
         colors = {
