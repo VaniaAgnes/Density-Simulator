@@ -9,7 +9,7 @@ class DensitySimulatorUI:
         self.root.title("Density Simulator")
         
         # Main frame
-        self.main_frame = ttk.Frame(self.root, padding="10")
+        self.main_frame = ttk.Frame(self.root, padding="17")
         self.main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         
         # Create custom widget containing canvas and slider
@@ -17,7 +17,7 @@ class DensitySimulatorUI:
         self.canvas_frame.grid(row=0, column=0, columnspan=2)
 
         # Initialize the animation with default density
-        self.liquid_animation = LiquidAnimation(self.canvas_frame.canvas, 800, 600, density=1.0)
+        self.liquid_animation = LiquidAnimation(self.canvas_frame.canvas, 800, 600, density=17)
         self.canvas_frame.set_liquid_animation(self.liquid_animation)
         self.liquid_animation.animate()
 
@@ -30,7 +30,7 @@ class CanvasFrame(tk.Frame):
         self.density_label.grid(row=0, column=0, columnspan=2, sticky=tk.W)
 
         self.density_slider = tk.Scale(self, from_=0.5, to=2.0, resolution=0.1, orient=tk.HORIZONTAL, command=self.update_density)
-        self.density_slider.set(1.0)  # Default density
+        self.density_slider.set(17)  # Default density
         self.density_slider.grid(row=1, column=0, columnspan=2, sticky=tk.W)
 
         # Object Selection Dropdown
@@ -83,8 +83,8 @@ class CanvasFrame(tk.Frame):
         wave_center = self.liquid_animation.wave_center
 
         # Calculate cube dimensions and position
-        cube_width = 100
-        cube_height = 100
+        cube_width = 170
+        cube_height = 170
         cube_x = 400 - cube_width / 2  # Center of the canvas
         cube_y = wave_center - cube_height  # Just above the liquid
 

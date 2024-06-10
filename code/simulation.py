@@ -1,14 +1,13 @@
-# simulation.py
 import tkinter as tk
 import math
 
 class LiquidAnimation:
-    def __init__(self, canvas, width, height, density=1.0):
+    def __init__(self, canvas, width, height, density=17):
         self.canvas = canvas
         self.width = width
         self.height = height
         self.wave_center = height - 150  # Adjust this value to change the position of the water lines
-        self.amplitude = 10
+        self.amplitude = 17
         self.period = 50
         self.offset = 0
         self.density = density  # Liquid density
@@ -17,7 +16,7 @@ class LiquidAnimation:
 
     def create_water(self):
         water_coords = [(0, self.height)]
-        for x in range(0, self.width, 10):
+        for x in range(0, self.width, 17):
             y = self.wave_center + self.amplitude * math.sin((x + self.offset) / self.period)
             water_coords.append((x, y))
         water_coords.append((self.width, self.height))
@@ -27,7 +26,7 @@ class LiquidAnimation:
     def animate(self):
         self.offset += 1
         water_coords = [(0, self.height)]
-        for x in range(0, self.width, 10):
+        for x in range(0, self.width, 17):
             y = self.wave_center + self.amplitude * math.sin((x + self.offset) / self.period)
             water_coords.append((x, y))
         water_coords.append((self.width, self.height))
