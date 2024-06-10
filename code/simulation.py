@@ -1,3 +1,4 @@
+#simulation.py 
 import tkinter as tk
 import math
 import time
@@ -124,4 +125,7 @@ class ObjectAnimation:
 
             # Schedule the next frame with a delay of 50 milliseconds (adjust as needed)
             self.canvas.after(50, self.animate_move, current_frame + 1, total_frames, distance)
+<<<<<<< HEAD
 
+=======
+>>>>>>> 16a02393288af8b6e24da7b123349be39715c265
