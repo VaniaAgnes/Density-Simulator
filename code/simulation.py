@@ -1,4 +1,3 @@
-#simulation.py 
 import tkinter as tk
 import math
 import time
@@ -6,7 +5,7 @@ import time
 class LiquidAnimation:
     def __init__(self, canvas, width, height, density=17):
         self.canvas = canvas
-        self.width = width
+        self.width = 1400
         self.height = height
         self.wave_center = height - 150  # Adjust this value to change the position of the water lines
         self.amplitude = 17
@@ -46,13 +45,13 @@ class LiquidAnimation:
 
     def get_color(self):
         # Determine the color based on density
-        if self.density < 0.9:
+        if self.density < 1000:
             return "#5cb5e1"  # Blue (Water)
-        elif self.density < 1.1:
+        elif self.density < 1100:
             return "#b39eb5"  # Purple (Combination of Water and Oil)
-        elif self.density < 1.3:
+        elif self.density < 1300:
             return "#FFEE8C"  # Yellow (Oil)
-        elif self.density < 1.6:
+        elif self.density < 1600:
             return "#FFD1DC"  # Pink (Soap)
         else:
             return "#BC9337" # Dark Orange (Honey)
@@ -125,7 +124,3 @@ class ObjectAnimation:
 
             # Schedule the next frame with a delay of 50 milliseconds (adjust as needed)
             self.canvas.after(50, self.animate_move, current_frame + 1, total_frames, distance)
-<<<<<<< HEAD
-
-=======
->>>>>>> 16a02393288af8b6e24da7b123349be39715c265
