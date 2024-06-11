@@ -97,17 +97,43 @@ class CanvasFrame(tk.Frame):
         selected_object = self.object_combobox.get()
 
         if selected_object == "Custom":
-            obj_density = float(self.obj_density_entry.get())
-            obj_volume = float(self.obj_volume_entry.get())
+            if not self.obj_density_entry.get() or not self.obj_volume_entry.get():
+                messagebox.showerror("Input Error", "Please enter values for both density and volume.")
+                return
+            try:
+                obj_density = float(self.obj_density_entry.get())
+                obj_volume = float(self.obj_volume_entry.get())
+            except ValueError:
+                messagebox.showerror("Input Error", "Please enter valid numbers for density and volume.")
+                return
         else:
-            obj_density, obj_volume = self.get_preset_object_properties(selected_object)
-            # Update entries with preset values for clarity
+            obj_density, _ = self.get_preset_object_properties(selected_object)
+            try:
+                obj_volume = float(
+                    self.obj_volume_entry.get()) if self.obj_volume_entry.get() else messagebox.showerror("Input Error",
+                                                                                                          "Please enter a valid number for volume.")
+            except ValueError:
+                messagebox.showerror("Input Error", "Please enter a valid number for volume.")
+                return
+
+            # Update density entry with preset value for clarity
             self.obj_density_entry.delete(0, tk.END)
             self.obj_density_entry.insert(0, obj_density)
-            self.obj_volume_entry.delete(0, tk.END)
-            self.obj_volume_entry.insert(0, obj_volume)
 
+        # Create cube
         self.create_cube(obj_density, obj_volume, selected_object)
+
+        # Show result in message box based on the object's properties
+        result = self.check_float_or_sink(obj_density, obj_volume)
+
+        if result == "Sink!":
+            object_animation = ObjectAnimation(self.canvas, self.cube, self.liquid_animation)
+            object_animation.sink_cube()
+        elif result == "Float!":
+            object_animation = ObjectAnimation(self.canvas, self.cube, self.liquid_animation)
+            object_animation.float_cube()
+
+        messagebox.showinfo("Float or Sink", result)
 
     def get_preset_object_properties(self, obj_name):
         # Define densities and volumes for preset objects
@@ -132,11 +158,18 @@ class CanvasFrame(tk.Frame):
         wave_center = self.liquid_animation.wave_center
 
         # Calculate cube dimensions based on density and volume
-        mass = obj_density * obj_volume
+        # Volume = mass / density
+        mass = int(obj_density * obj_volume)
         # Assuming the cube shape, calculate its side length
-        cube_side_length = math.pow(mass, 1/3.0) * 17  # Adjust scale for visibility
+        cube_side_length = math.pow(mass, 1 / 3.0) * 10  # Adjust scale for visibility
         cube_x = 400 - cube_side_length / 2  # Center of the canvas
-        cube_y = wave_center - cube_side_length  # Position just above the liquid
+
+        # Determine cube_y based on buoyancy
+        result = self.check_float_or_sink(obj_density, obj_volume)
+        if result == "Float!":
+            cube_y = wave_center - cube_side_length  # Position just above the liquid
+        else:
+            cube_y = wave_center + 100  # Position below the liquid
 
         # Determine color based on selected object
         colors = {
@@ -153,12 +186,19 @@ class CanvasFrame(tk.Frame):
         cube_color = colors.get(selected_object, "black")
 
         # Draw cube
-        if selected_object == "Silicon":
-            self.cube = self.canvas.create_rectangle(cube_x, cube_y, cube_x + cube_side_length, cube_y + cube_side_length,
-                                                     fill=cube_color, outline=outline_color)
+        self.cube = self.canvas.create_rectangle(cube_x, cube_y, cube_x + cube_side_length, cube_y + cube_side_length,
+                                                 fill=cube_color, outline="")
+
+    def check_float_or_sink(self, obj_density, obj_volume):
+        liquid_density = self.liquid_animation.density
+        buoyant_force = liquid_density * obj_volume * 9.81  # Assuming gravity = 9.81 m/s^2
+        weight = obj_density * obj_volume * 9.81  # Assuming gravity = 9.81 m/s^2
+
+        # Compare the weight and buoyant force to determine if the object floats or sinks
+        if buoyant_force >= weight:
+            return "Float!"
         else:
-            self.cube = self.canvas.create_rectangle(cube_x, cube_y, cube_x + cube_side_length, cube_y + cube_side_length,
-                                                     fill=cube_color)
+            return "Sink!"
 
 if __name__ == "__main__":
     root = tk.Tk()
