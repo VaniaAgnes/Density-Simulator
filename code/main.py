@@ -18,7 +18,7 @@ class DensitySimulatorUI:
         self.canvas_frame.grid(row=1, column=0, columnspan=2)
 
         # Initialize the animation with default density
-        self.liquid_animation = LiquidAnimation(self.canvas_frame.canvas, 800, 600, density=0.5)
+        self.liquid_animation = LiquidAnimation(self.canvas_frame.canvas, 800, 600, density=1.0)  # Use 1.0 for default
         self.canvas_frame.set_liquid_animation(self.liquid_animation)
         self.liquid_animation.animate()
 
@@ -46,9 +46,9 @@ class CanvasFrame(tk.Frame):
         # Liquid Density Slider
         self.density_label = ttk.Label(self, text="Liquid Density (kg/m^3):")
         self.density_label.grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
-        self.density_slider = tk.Scale(self, from_=500, to=2000, resolution=10, orient=tk.HORIZONTAL,
+        self.density_slider = tk.Scale(self, from_=0.5, to=2.0, resolution=0.01, orient=tk.HORIZONTAL,
                                        command=self.update_density)
-        self.density_slider.set(1000)  # Default density
+        self.density_slider.set(1.0)  # Default density
         self.density_slider.grid(row=2, column=0, columnspan=2, sticky=tk.W, padx=5, pady=5)
 
         # Object Selection Dropdown
@@ -125,7 +125,8 @@ class CanvasFrame(tk.Frame):
                 try:
                     obj_mass = float(self.obj_mass_entry.get()) if self.obj_mass_entry.get() else obj_density * float(
                         self.obj_volume_entry.get())
-                    obj_volume = float(self.obj_volume_entry.get()) if self.obj_volume_entry.get() else obj_mass / obj_density
+                    obj_volume = float(
+                        self.obj_volume_entry.get()) if self.obj_volume_entry.get() else obj_mass / obj_density
                 except ValueError:
                     messagebox.showerror("Input Error", "Please enter valid numbers for mass and volume.")
                     return
@@ -133,19 +134,22 @@ class CanvasFrame(tk.Frame):
         obj_density = obj_mass / obj_volume
         self.calc_density_value.config(text=f"{obj_density:.2f} kg/m^3")
 
-        self.create_cube(obj_density, obj_volume, selected_object)
-
         # Show result in message box based on the object's properties
         result = self.check_float_or_sink(obj_density, obj_volume)
 
         if result == "Sink!":
+            # Create cube first
+            self.create_cube(obj_density, obj_volume, selected_object)
+            # Then animate sinking
             object_animation = ObjectAnimation(self.canvas, self.cube, self.liquid_animation)
             object_animation.sink_cube()
         elif result == "Float!":
+            # Create cube first
+            self.create_cube(obj_density, obj_volume, selected_object)
+            # Then animate floating
             object_animation = ObjectAnimation(self.canvas, self.cube, self.liquid_animation)
             object_animation.float_cube()
 
-        messagebox.showinfo("Float or Sink", result)
 
     def create_cube(self, obj_density, obj_volume, selected_object):
         # Remove existing cube
@@ -163,9 +167,9 @@ class CanvasFrame(tk.Frame):
         # Determine cube_y based on buoyancy
         result = self.check_float_or_sink(obj_density, obj_volume)
         if result == "Float!":
-            cube_y = wave_center - cube_side_length  # Position just above the liquid
+            cube_y = wave_center - 15  # Position just above the liquid
         else:
-            cube_y = wave_center + 100  # Position below the liquid
+            cube_y = wave_center + 130  # Position below the liquid
 
         # Determine color based on selected object
         colors = {
@@ -198,7 +202,7 @@ class CanvasFrame(tk.Frame):
 
     def reset(self):
         # Clear inputs
-        self.density_slider.set(1000)
+        self.density_slider.set(1.0)
         self.object_combobox.current(0)
         self.obj_mass_entry.delete(0, tk.END)
         self.obj_volume_entry.delete(0, tk.END)
