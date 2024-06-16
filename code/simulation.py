@@ -7,11 +7,11 @@ class LiquidAnimation:
         self.canvas = canvas
         self.width = 1400
         self.height = height
-        self.wave_center = height - 150  # Adjust this value to change the position of the water lines
-        self.amplitude = 17
+        self.wave_center = height - 200 # Adjust this value to change the position of the water lines
+        self.amplitude = 5
         self.period = 50
         self.offset = 0
-        self.density = density  # Liquid density
+        self.density = density # Liquid density
         self.water_polygon = None
         self.create_water()
 
@@ -45,16 +45,16 @@ class LiquidAnimation:
 
     def get_color(self):
         # Determine the color based on density
-        if self.density < 1000:
+        if self.density < 1.0:
             return "#5cb5e1"  # Blue (Water)
-        elif self.density < 1100:
+        elif self.density < 1.1:
             return "#b39eb5"  # Purple (Combination of Water and Oil)
-        elif self.density < 1300:
+        elif self.density < 1.3:
             return "#FFEE8C"  # Yellow (Oil)
-        elif self.density < 1600:
+        elif self.density < 1.6:
             return "#FFD1DC"  # Pink (Soap)
         else:
-            return "#BC9337" # Dark Orange (Honey)
+            return "#BC9337"  # Dark Orange (Honey)
 
     def transition_color(self, new_color):
         # Smoothly transition the color
@@ -86,41 +86,32 @@ class ObjectAnimation:
         self.cube_id = cube_id
         self.liquid_animation = liquid_animation
 
-    def sink_cube(self):
-        # Get the wave center and position below the liquid
-        wave_center = self.liquid_animation.wave_center
-        cube_y = wave_center + 100  # Adjust this value as needed
-
-        # Get current cube coordinates
+    def move_up(self, target_y):
         x1, y1, x2, y2 = self.canvas.coords(self.cube_id)
+        if y1 > target_y:
+            self.canvas.move(self.cube_id, 0, -2)
+            self.canvas.after(25, self.move_up, target_y)  # Move every 25 milliseconds
+        else:
+            # Object has reached the target position
+            pass
 
-        # Calculate the movement distance for sinking
-        distance = cube_y - y1
+    def move_down(self, target_y):
+        x1, y1, x2, y2 = self.canvas.coords(self.cube_id)
+        if y1 < target_y:
+            self.canvas.move(self.cube_id, 0, 2)
+            self.canvas.after(25, self.move_down, target_y)  # Move every 25 milliseconds
+        else:
+            # Object has reached the target position
+            pass
 
-        # Animate cube movement
-        self.animate_move(0, 30, distance)   # Change 20 to the number of frames you want for the animation
+    def sink_cube(self):
+        wave_center = self.liquid_animation.wave_center
+        target_y = wave_center + 130  # Target position below the liquid
+
+        self.move_down(target_y)
 
     def float_cube(self):
         wave_center = self.liquid_animation.wave_center
-        cube_side_length = 50  # Adjust as needed
-        max_float_height = wave_center - cube_side_length
+        target_y = wave_center - 15  # Target position just above the liquid
 
-        # Get current cube coordinates
-        x1, y1, x2, y2 = self.canvas.coords(self.cube_id)
-
-        # Calculate movement distance
-        distance = max_float_height - y1
-
-        # Animate cube movement
-        self.animate_move(0, 40, distance)  # Adjust total_frames for a slower animation
-
-    def animate_move(self, current_frame, total_frames, distance):
-        if current_frame < total_frames:
-            # Calculate the increment for movement
-            increment = distance / total_frames
-
-            # Move the cube incrementally
-            self.canvas.move(self.cube_id, 0, increment)
-
-            # Schedule the next frame with a delay of 50 milliseconds (adjust as needed)
-            self.canvas.after(50, self.animate_move, current_frame + 1, total_frames, distance)
+        self.move_up(target_y)
