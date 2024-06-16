@@ -1,12 +1,11 @@
 import tkinter as tk
 from tkinter import ttk
 from main import CanvasFrame
-from simulation import LiquidAnimation  # Import LiquidAnimation class
+from simulation import LiquidAnimation # Import LiquidAnimation class
 import tkinter.messagebox as messagebox
 
-
 class DensitySimulatorUI:
-    def _init_(self, root):
+    def __init__(self, root):
         self.root = root
         self.root.title("Density Simulator")
 
