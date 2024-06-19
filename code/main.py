@@ -185,7 +185,7 @@ class CanvasFrame(tk.Frame):
 
         # Determine color based on selected object
         colors = {
-            "Paper": "white",
+            "Paper": "#FAF9F6",
             "Ice": "light blue",
             "Brick": "#bc4a3c",  # Red brown
             "Silicon": "#9599a5",
