@@ -105,31 +105,44 @@ class CanvasFrame(tk.Frame):
         selected_object = self.object_combobox.get()
 
         if selected_object == "Custom":
+            # Enable the entries for custom object
+            self.obj_mass_entry.config(state="normal")
+            self.obj_volume_entry.config(state="normal")
+
             if not self.obj_mass_entry.get() or not self.obj_volume_entry.get():
                 messagebox.showerror("Input Error", "Please enter values for both mass and volume.")
                 return
             try:
                 obj_mass = float(self.obj_mass_entry.get())
                 obj_volume = float(self.obj_volume_entry.get())
+
+                # Check if mass is within range
+                if obj_mass < 20 or obj_mass > 100:
+                    messagebox.showerror("Input Error", "Mass value must be between 20 and 100.")
+                    return
+
             except ValueError:
                 messagebox.showerror("Input Error", "Please enter valid numbers for mass and volume.")
                 return
         else:
-            obj_density = self.object_values[selected_object]  # Get the density from object_values
-            if not self.obj_mass_entry.get() and not self.obj_volume_entry.get():
-                obj_mass = obj_density * 0.01  # default volume = 0.01 m^3 for preset objects
-                obj_volume = 0.01  # default volume = 0.01 m^3 for preset objects
-                self.obj_mass_entry.insert(0, obj_mass)
-                self.obj_volume_entry.insert(0, obj_volume)
-            else:
-                try:
-                    obj_mass = float(self.obj_mass_entry.get()) if self.obj_mass_entry.get() else obj_density * float(
-                        self.obj_volume_entry.get())
-                    obj_volume = float(
-                        self.obj_volume_entry.get()) if self.obj_volume_entry.get() else obj_mass / obj_density
-                except ValueError:
-                    messagebox.showerror("Input Error", "Please enter valid numbers for mass and volume.")
-                    return
+            # Disable the entries for preset objects
+            self.obj_mass_entry.config(state="normal")  # Enable temporarily to insert values
+            self.obj_volume_entry.config(state="normal")  # Enable temporarily to insert values
+
+            obj_density = self.object_values.get(selected_object, 0)  # Get the density from object_values
+
+            # Use default values for mass and volume
+            obj_mass = obj_density * 25  # default mass = density * 25
+            obj_volume = 25  # default volume = 25
+
+            # Display the default values in the entry fields
+            self.obj_mass_entry.delete(0, tk.END)
+            self.obj_mass_entry.insert(0, f"{obj_mass:.2f}")
+            self.obj_mass_entry.config(state="disabled")  # Make the entry disabled but visible
+
+            self.obj_volume_entry.delete(0, tk.END)
+            self.obj_volume_entry.insert(0, f"{obj_volume:.2f}")
+            self.obj_volume_entry.config(state="disabled")  # Make the entry disabled but visible
 
         obj_density = obj_mass / obj_volume
         self.calc_density_value.config(text=f"{obj_density:.2f} kg/m^3")
@@ -150,7 +163,6 @@ class CanvasFrame(tk.Frame):
             object_animation = ObjectAnimation(self.canvas, self.cube, self.liquid_animation)
             object_animation.float_cube()
 
-
     def create_cube(self, obj_density, obj_volume, selected_object):
         # Remove existing cube
         if self.cube:
@@ -167,7 +179,7 @@ class CanvasFrame(tk.Frame):
         # Determine cube_y based on buoyancy
         result = self.check_float_or_sink(obj_density, obj_volume)
         if result == "Float!":
-            cube_y = wave_center - 15  # Position just above the liquid
+            cube_y = wave_center - 20  # Position just above the liquid
         else:
             cube_y = wave_center + 130  # Position below the liquid
 
