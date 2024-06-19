@@ -8,7 +8,7 @@ class LiquidAnimation:
         self.width = 1400
         self.height = height
         self.wave_center = height - 200 # Adjust this value to change the position of the water lines
-        self.amplitude = 5
+        self.amplitude = 4
         self.period = 50
         self.offset = 0
         self.density = density # Liquid density
@@ -112,6 +112,6 @@ class ObjectAnimation:
 
     def float_cube(self):
         wave_center = self.liquid_animation.wave_center
-        target_y = wave_center - 15  # Target position just above the liquid
+        target_y = wave_center - 20  # Target position just above the liquid
 
         self.move_up(target_y)
