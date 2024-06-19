@@ -121,28 +121,39 @@ class CanvasFrame(tk.Frame):
                     messagebox.showerror("Input Error", "Mass value must be between 20 and 100.")
                     return
 
+                # Check if volume is within limit
+                if obj_volume > 15:
+                    messagebox.showerror("Input Error", "Volume value must be 15 or below.")
+                    return
+
             except ValueError:
                 messagebox.showerror("Input Error", "Please enter valid numbers for mass and volume.")
                 return
         else:
-            # Disable the entries for preset objects
+            # Disable the mass entry for preset objects, volume entry remains enabled
             self.obj_mass_entry.config(state="normal")  # Enable temporarily to insert values
-            self.obj_volume_entry.config(state="normal")  # Enable temporarily to insert values
 
             obj_density = self.object_values.get(selected_object, 0)  # Get the density from object_values
 
-            # Use default values for mass and volume
+            # Use default value for mass and allow user to edit volume
             obj_mass = obj_density * 25  # default mass = density * 25
-            obj_volume = 25  # default volume = 25
-
-            # Display the default values in the entry fields
             self.obj_mass_entry.delete(0, tk.END)
             self.obj_mass_entry.insert(0, f"{obj_mass:.2f}")
             self.obj_mass_entry.config(state="disabled")  # Make the entry disabled but visible
 
-            self.obj_volume_entry.delete(0, tk.END)
-            self.obj_volume_entry.insert(0, f"{obj_volume:.2f}")
-            self.obj_volume_entry.config(state="disabled")  # Make the entry disabled but visible
+            # If volume is empty or invalid, set to default value
+            try:
+                obj_volume = float(self.obj_volume_entry.get())
+
+                # Check if volume is within limit
+                if obj_volume > 15:
+                    messagebox.showerror("Input Error", "Volume value must be 15 or below.")
+                    return
+
+            except ValueError:
+                obj_volume = 5  # default volume = 25
+                self.obj_volume_entry.delete(0, tk.END)
+                self.obj_volume_entry.insert(0, f"{obj_volume:.2f}")
 
         obj_density = obj_mass / obj_volume
         self.calc_density_value.config(text=f"{obj_density:.2f} kg/m^3")
